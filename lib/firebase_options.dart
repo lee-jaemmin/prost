@@ -21,20 +21,11 @@ class DefaultFirebaseOptions {
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for android - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
         return windows;
       case TargetPlatform.linux:
@@ -57,6 +48,32 @@ class DefaultFirebaseOptions {
     authDomain: 'prost-33c19.firebaseapp.com',
     storageBucket: 'prost-33c19.firebasestorage.app',
     measurementId: 'G-GWB6HD2GJT',
+  );
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyDD8sPJ-2kjqPTex_uYgWH164R548YGUPY',
+    appId: '1:770385364338:android:279a4bed667d19e1a689eb',
+    messagingSenderId: '770385364338',
+    projectId: 'prost-33c19',
+    storageBucket: 'prost-33c19.firebasestorage.app',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyDknDGXkvisYhGzn7Eu3Z097-bXr_PjwJk',
+    appId: '1:770385364338:ios:fa6af301868f7e19a689eb',
+    messagingSenderId: '770385364338',
+    projectId: 'prost-33c19',
+    storageBucket: 'prost-33c19.firebasestorage.app',
+    iosBundleId: 'com.example.prost',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyDknDGXkvisYhGzn7Eu3Z097-bXr_PjwJk',
+    appId: '1:770385364338:ios:fa6af301868f7e19a689eb',
+    messagingSenderId: '770385364338',
+    projectId: 'prost-33c19',
+    storageBucket: 'prost-33c19.firebasestorage.app',
+    iosBundleId: 'com.example.prost',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
