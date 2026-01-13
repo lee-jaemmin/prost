@@ -25,17 +25,17 @@ class UserRepository {
   /// 이미 있는 데이터: 냅둠, 새 데이터: db에 등록
   Future<void> upsertFromAuth({
     required String company,
-    required String userName,
+    required String username,
   }) async {
     final currentUser = _auth.currentUser;
     if (currentUser == null)
       throw StateError('로그인이 필요합니다. ERROR CODE: currentUser is null');
 
-    // create model using company, userName from outside
+    // create model using company, username from outside
     final appUser = AppUser.fromFirebase(
       currentUser,
       company: company,
-      userName: userName,
+      username: username,
     );
 
     final ref = _db.collection('users').doc(currentUser.uid);
@@ -50,7 +50,7 @@ class UserRepository {
     } else {
       // 바뀔 수 있을 만한 정보만 업데이트
       await ref.update({
-        'userName': userName,
+        'username': username,
         'company': company,
       });
     }

@@ -3,32 +3,33 @@ import 'package:firebase_auth/firebase_auth.dart' as auth;
 
 class AppUser {
   final String uid;
-  final String userName;
+  final String username;
   final String company;
-  final DateTime createdAt;
+  final DateTime createdat;
 
   const AppUser({
     // const: All field has to be final
     // use memory only once
     required this.uid,
-    required this.userName,
+    required this.username,
     required this.company,
-    required this.createdAt,
+    required this.createdat,
   });
 
   AppUser copyWith({
     // bc of final fields can't moidfied
     // make copied new instance(changed only certatin field)
-    String? userName,
+    //-------------------------------------------------------
+    String? username,
     String? company,
-    DateTime? createdAt,
+    DateTime? createdat,
     // nullable: to choose only field that I want to modify
   }) {
     return AppUser(
       uid: this.uid,
-      userName: userName ?? this.userName,
+      username: username ?? this.username,
       company: company ?? this.company,
-      createdAt: createdAt ?? this.createdAt,
+      createdat: createdat ?? this.createdat,
       // if modified: modified field, else: same value
     );
   }
@@ -37,35 +38,35 @@ class AppUser {
   factory AppUser.fromFirebase(
     auth.User user, {
     required String company,
-    required String userName,
+    required String username,
   }) {
-    // factory: smart initializer; return instance according to logid I assign
+    // factory: smart initializer; return instance according to logic I assign
     // inside {}: named parameter, outside {}: positional parameter
 
     return AppUser(
       uid: user.uid,
-      userName: userName,
+      username: username,
       company: company,
-      createdAt: DateTime.now(),
+      createdat: DateTime.now(),
     );
   }
 
-  /// 2. restoraion through Firestroe data
+  /// 2. restoraion through Firestore data
   factory AppUser.fromMap(String uid, Map<String, dynamic> map) {
     return AppUser(
       uid: uid,
-      userName: map['userName'],
+      username: map['username'],
       company: map['company'],
-      createdAt: map['createdAt'],
+      createdat: map['createdat'],
     );
   }
 
   /// 3. transformation for Firestore save
   Map<String, dynamic> toMap() {
     return {
-      'userName': userName,
+      'username': username,
       'company': company,
-      'createdAt': createdAt,
+      'createdat': createdat,
     };
   }
 }
