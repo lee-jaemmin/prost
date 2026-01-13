@@ -57,7 +57,7 @@ class AppUser {
       uid: uid,
       username: map['username'],
       company: map['company'],
-      createdat: map['createdat'],
+      createdat: (map['createdat'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
 
