@@ -26,6 +26,7 @@ class UserRepository {
   Future<void> upsertFromAuth({
     required String company,
     required String username,
+    required bool isAdmin,
   }) async {
     final currentUser = _auth.currentUser;
     if (currentUser == null)
@@ -35,6 +36,7 @@ class UserRepository {
     final appUser = AppUser.fromFirebase(
       currentUser,
       company: company,
+      isAdmin: isAdmin,
       username: username,
     );
 
@@ -45,6 +47,7 @@ class UserRepository {
       // 신규 가입 시 모든 정보 저장
       await ref.set({
         ...appUser.toMap(),
+
         //...을 통해 내용물만 그대로 저장 가능: 중첩 방지
       });
     } else {

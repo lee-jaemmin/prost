@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
+import 'package:flutter/foundation.dart';
 
 class AppUser {
   final String uid;
   final String username;
   final String company;
+  final bool isAdmin;
   final DateTime createdat;
 
   const AppUser({
@@ -13,6 +15,7 @@ class AppUser {
     required this.uid,
     required this.username,
     required this.company,
+    required this.isAdmin,
     required this.createdat,
   });
 
@@ -22,6 +25,7 @@ class AppUser {
     //-------------------------------------------------------
     String? username,
     String? company,
+    bool? isAdmin,
     DateTime? createdat,
     // nullable: to choose only field that I want to modify
   }) {
@@ -29,6 +33,7 @@ class AppUser {
       uid: this.uid,
       username: username ?? this.username,
       company: company ?? this.company,
+      isAdmin: isAdmin ?? false,
       createdat: createdat ?? this.createdat,
       // if modified: modified field, else: same value
     );
@@ -39,6 +44,7 @@ class AppUser {
     auth.User user, {
     required String company,
     required String username,
+    required bool isAdmin,
   }) {
     // factory: smart initializer; return instance according to logic I assign
     // inside {}: named parameter, outside {}: positional parameter
@@ -47,6 +53,7 @@ class AppUser {
       uid: user.uid,
       username: username,
       company: company,
+      isAdmin: isAdmin,
       createdat: DateTime.now(),
     );
   }
@@ -55,8 +62,9 @@ class AppUser {
   factory AppUser.fromMap(String uid, Map<String, dynamic> map) {
     return AppUser(
       uid: uid,
-      username: map['username'],
-      company: map['company'],
+      username: map['username'] ?? '이름 미지정',
+      company: map['company'] ?? '회사 미지정',
+      isAdmin: map['isAdmin'] ?? false,
       createdat: (map['createdat'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
