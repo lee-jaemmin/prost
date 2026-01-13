@@ -31,7 +31,7 @@ class UserRepository {
     if (currentUser == null)
       throw StateError('로그인이 필요합니다. ERROR CODE: currentUser is null');
 
-    // create model using company, username from outside
+    // create AppUser instance using company, username from outside
     final appUser = AppUser.fromFirebase(
       currentUser,
       company: company,
