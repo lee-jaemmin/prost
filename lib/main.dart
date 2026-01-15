@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:prost/firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:prost/constants/sizes.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:prost/screens/home_screen.dart';
+import 'package:prost/screens/login_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,7 +62,17 @@ class Prost extends StatelessWidget {
           type: BottomNavigationBarType.fixed,
         ),
       ),
-      home: HomeScreen(),
+      home: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          // 1. 로그인 정보가 있으면 -> 홈 화면으로
+          if (snapshot.hasData) {
+            return HomeScreen();
+          }
+          // 2. 없으면 -> 로그인 화면으로
+          return const LoginScreen();
+        },
+      ),
     );
   }
 }
