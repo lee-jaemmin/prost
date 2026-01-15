@@ -14,7 +14,7 @@ class TableRepository {
 
   /// shorten the data path as a central controller
   CollectionReference<Map<String, dynamic>> _tableCol(String company) {
-    return _db.collection('stores').doc(company).collection('tables');
+    return _db.collection('company').doc(company).collection('tables');
   }
 
   /// live stream
