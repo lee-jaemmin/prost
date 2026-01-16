@@ -54,7 +54,7 @@ class HomeScreen extends StatelessWidget {
               children: [
                 SidebarMenu(
                   name: '테이블 관리',
-                  onTapFunc: CheckAdminAndNavigate(
+                  onTapFunc: () => CheckAdminAndNavigate(
                     context: context,
                     designatedPage: TableManagementScreen(),
                   ),
@@ -62,7 +62,7 @@ class HomeScreen extends StatelessWidget {
                 Gaps.v20(context),
                 SidebarMenu(
                   name: '예약',
-                  onTapFunc: CheckAdminAndNavigate(
+                  onTapFunc: () => CheckAdminAndNavigate(
                     context: context,
                     designatedPage: TableReservationScreen(),
                   ),
@@ -70,7 +70,7 @@ class HomeScreen extends StatelessWidget {
                 Gaps.v20(context),
                 SidebarMenu(
                   name: '로그아웃',
-                  onTapFunc: signOutAndNavigate(context),
+                  onTapFunc: () => signOutAndNavigate(context),
                 ),
                 Gaps.v20(context),
               ],
