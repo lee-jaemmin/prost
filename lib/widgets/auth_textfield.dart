@@ -7,6 +7,7 @@ class AuthTextfield extends StatelessWidget {
   final IconData icon;
   final bool obscureText;
   final TextInputType keyboardType;
+  final Widget? suffixIcon;
 
   // 생성자를 통해 값을 전달받습니다.
   const AuthTextfield({
@@ -16,6 +17,7 @@ class AuthTextfield extends StatelessWidget {
     required this.icon,
     this.obscureText = false, // 기본값 설정
     this.keyboardType = TextInputType.text,
+    this.suffixIcon,
   });
 
   @override
@@ -38,6 +40,7 @@ class AuthTextfield extends StatelessWidget {
         decoration: InputDecoration(
           icon: Icon(icon, color: Colors.grey),
           border: InputBorder.none,
+          suffixIcon: suffixIcon,
           hintText: hintText,
           hintStyle: TextStyle(color: Colors.grey.shade400),
         ),
