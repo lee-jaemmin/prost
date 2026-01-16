@@ -16,11 +16,11 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isLogin = true; // true: 로그인 모드, false: 회원가입 모드
   bool isLoading = false; // 로딩 상태
 
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _uidController = TextEditingController();
   final _companyController = TextEditingController();
-
+  bool _isPasswordValid = false;
   final _formKey = GlobalKey<FormState>();
 
   String _generateFakeEmail(String id) {
@@ -31,6 +31,30 @@ class _LoginScreenState extends State<LoginScreen> {
 
   String? _selectedCompany;
 
+  @override
+  void initState() {
+    super.initState();
+    // [추가] 비밀번호 입력 시 실시간으로 유효성 체크
+    _passwordController.addListener(_validatePassword);
+  }
+
+  @override
+  void dispose() {
+    _passwordController.removeListener(_validatePassword);
+    _passwordController.dispose();
+    _nameController.dispose();
+    _uidController.dispose();
+    _companyController.dispose();
+    super.dispose();
+  }
+
+  void _validatePassword() {
+    final isValid = _passwordController.text.length >= 6;
+    if (_isPasswordValid != isValid) {
+      setState(() => _isPasswordValid = isValid);
+    }
+  }
+
   // 제출 함수 (로그인 또는 회원가입)
   void _submit() async {
     if (!_formKey.currentState!.validate()) return;
@@ -38,7 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => isLoading = true);
 
     // 사용자가 입력한 아이디를 이메일 형식으로 변환
-    final String fakeEmail = _generateFakeEmail(_emailController.text);
+    final String fakeEmail = _generateFakeEmail(_uidController.text);
     final String password = _passwordController.text.trim();
 
     try {
@@ -61,13 +85,18 @@ class _LoginScreenState extends State<LoginScreen> {
             .collection('users')
             .doc(userCredential.user!.uid)
             .set({
-              'username': _emailController.text.trim(), // 원본 아이디 저장
+              'username': _nameController.text.trim(), // 이름 저장
               'email': fakeEmail, // (참고용) 전체 이메일
-              'name': _nameController.text.trim(),
+              'id': _uidController.text.trim(),
               'company': _companyController.text.trim(),
               'role': 'user',
               'createdAt': FieldValue.serverTimestamp(),
             });
+      }
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
       }
     } on FirebaseAuthException catch (e) {
       String message = "오류가 발생했습니다.";
@@ -151,7 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   // [공통] 아이디
                   AuthTextfield(
-                    controller: _emailController,
+                    controller: _uidController,
                     hintText: "아이디",
                     icon: Icons.email_outlined,
                     keyboardType: TextInputType.emailAddress,
@@ -164,7 +193,26 @@ class _LoginScreenState extends State<LoginScreen> {
                     hintText: "비밀번호",
                     icon: Icons.lock_outline,
                     obscureText: true,
+                    suffixIcon: _isPasswordValid
+                        ? const Icon(Icons.check_circle, color: Colors.green)
+                        : null,
                   ),
+                  if (!isLogin)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, left: 15),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          _isPasswordValid
+                              ? "사용 가능한 비밀번호입니다."
+                              : "비밀번호가 6자리 미만입니다.",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: _isPasswordValid ? Colors.green : Colors.red,
+                          ),
+                        ),
+                      ),
+                    ),
                   const SizedBox(height: 40),
 
                   // 3. 메인 버튼 (로그인 or 가입하기)
@@ -172,9 +220,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: isLoading ? null : _submit,
+                      onPressed: (isLoading || (!isLogin && !_isPasswordValid))
+                          ? null
+                          : _submit,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black87, // 브랜드 컬러
+                        disabledBackgroundColor: Colors.grey.shade300,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30), // 동글동글
                         ),
