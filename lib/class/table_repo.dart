@@ -38,6 +38,7 @@ class TableRepository {
     required String phonenumber,
     required String bottle,
     required String status,
+    required int persons,
     required String staff,
   }) async {
     // 저장할 위치(문서 참조)를 먼저 정해서 tid 확보
@@ -50,6 +51,7 @@ class TableRepository {
       phonenumber: phonenumber,
       bottle: bottle,
       staff: staff,
+      persons: persons,
       status: 'empty',
       createdat: DateTime.now(),
     );
@@ -89,6 +91,7 @@ class TableRepository {
         'phonenumber': '',
         'staff': '',
         'bottle': '',
+        'persons': 0,
         'updatedAt': FieldValue.serverTimestamp(),
       });
     }
@@ -102,6 +105,7 @@ class TableRepository {
     required String customer, // 손님 이름
     required String phonenumber, // 손님 번호
     required String staff, // 담당 직원
+    required int persons,
     required String bottle, // 술 종류
   }) async {
     await _tableCol(company).doc(tid).update({
@@ -110,6 +114,7 @@ class TableRepository {
       'staff': staff,
       'bottle': bottle,
       'status': 'active', // 정보가 입력되면 상태를 'active'로 변경
+      'persons': persons,
       'updatedAt': FieldValue.serverTimestamp(), // 수정 시간 기록
     });
   }
