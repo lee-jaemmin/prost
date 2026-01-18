@@ -33,6 +33,7 @@ class TableModel {
     String? phonenumber,
     String? staff,
     String? bottle,
+    int? persons,
     DateTime? createdat,
   }) {
     return TableModel(
