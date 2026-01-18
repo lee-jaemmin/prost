@@ -15,7 +15,7 @@ class UserRepository {
 
   /// find path to store data(maybe AppUser instance)
   DocumentReference<Map<String, dynamic>> _meDoc() {
-    final uid = _auth.currentUser?.uid;
+    final uid = _auth.currentUser?.uid; // 지금 로그인한 사람 누구야?
     if (uid == null) {
       throw StateError('로그인이 필요합니다. ERROR CODE: currentUser is null');
     }
@@ -48,7 +48,7 @@ class UserRepository {
       await ref.set({
         ...appUser.toMap(),
 
-        //...을 통해 내용물만 그대로 저장 가능: 중첩 방지
+        //...: {}안에 내용 물 꺼내기.
       });
     } else {
       // 바뀔 수 있을 만한 정보만 업데이트
