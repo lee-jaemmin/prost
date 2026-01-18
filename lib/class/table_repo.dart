@@ -12,26 +12,36 @@ class TableRepository {
   }) : _db = db ?? FirebaseFirestore.instance,
        _auth = authInstance ?? auth.FirebaseAuth.instance;
 
-  /// shorten the data path as a central controller
+  /// return the address of 'collection' the group of doc.
   CollectionReference<Map<String, dynamic>> _tableCol(String company) {
     return _db.collection('company').doc(company).collection('tables');
   }
 
   /// live stream
   Stream<List<TableModel>> getTablesStream(String company, String section) {
-    return _tableCol(company)
-        .where('section', isEqualTo: section)
-        .snapshots()
-        .map(
+    return _tableCol(
+      company,
+    ).where('section', isEqualTo: section).snapshots().map((snap) {
+      final List<TableModel> tableList = snap.docs.map((doc) {
+        final Map<String, dynamic> data = doc.data();
+        final String id = doc.id;
+        return TableModel.fromMap(id, data);
+      }).toList();
+      return tableList;
+    });
+  }
+
+  /* 
+  .map(
           (snap) => snap.docs
               .map((doc) => TableModel.fromMap(doc.id, doc.data()))
               .toList(),
         );
-  }
+  */
 
   /// [ADD] create table
   Future<void> createTable({
-    required String company,
+    required String company, // *** 이건 자동이어야 할 거 같은데 ***
     required String tablename,
     required String section,
     required String customer,
@@ -98,7 +108,7 @@ class TableRepository {
     await batch.commit();
   }
 
-  /// [ACT] activation table
+  /// [ACT] activation table: 여기가 사실상 정보 입력 하는 부분.
   Future<void> registerBottleKeep({
     required String company,
     required String tid,
