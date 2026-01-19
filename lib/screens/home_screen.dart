@@ -1,15 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:prost/class/table.dart';
-import 'package:prost/class/table_repo.dart';
 import 'package:prost/constants/gaps.dart';
 import 'package:prost/methods/check_admin.dart';
 import 'package:prost/screens/login_screen.dart';
 import 'package:prost/screens/table_management_screen.dart';
 import 'package:prost/screens/table_reservation_screen.dart';
 import 'package:prost/widgets/sidebar_menu.dart';
-import 'package:prost/widgets/table_card.dart';
+import 'package:prost/widgets/table_gridview.dart';
 
 class HomeScreen extends StatelessWidget {
   final String company = "prost"; // 실제로는 로그인한 유저의 소속 정보를 가져와야 함
@@ -102,43 +100,6 @@ class HomeScreen extends StatelessWidget {
               .toList(),
         ),
       ),
-    );
-  }
-}
-
-class TableGridView extends StatelessWidget {
-  final String company;
-  final String section;
-  final TableRepository _repo = TableRepository();
-
-  TableGridView({required this.company, required this.section});
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<List<TableModel>>(
-      stream: _repo.getTablesStream(company, section), // 실시간 데이터 수신
-      builder: (context, snapshot) {
-        if (snapshot.hasError)
-          return Center(child: Text("오류 발생: snapshot.hasError"));
-        if (!snapshot.hasData)
-          return Center(child: CircularProgressIndicator());
-
-        final tables = snapshot.data!;
-
-        return GridView.builder(
-          padding: EdgeInsets.all(10),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3, // 한 줄에 3개씩 배치
-            mainAxisSpacing: 10,
-            crossAxisSpacing: 10,
-          ),
-          itemCount: tables.length,
-          itemBuilder: (context, index) {
-            final table = tables[index];
-            return TableCard(table: table);
-          },
-        );
-      },
     );
   }
 }
