@@ -8,12 +8,24 @@ Future<void> CheckAdminAndNavigate({
 }) async {
   final currentUser = FirebaseAuth.instance.currentUser;
 
-  if (currentUser == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('로그인이 필요합니다.'),
+  void _showSimpleDialog(BuildContext context, String title, String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('확인', style: TextStyle(color: Colors.black)),
+          ),
+        ],
       ),
     );
+  }
+
+  if (currentUser == null) {
+    _showSimpleDialog(context, '로그인 필요', '로그인이 필요한 서비스입니다.');
     return;
   }
 
@@ -25,9 +37,7 @@ Future<void> CheckAdminAndNavigate({
         .get();
 
     if (!doc.exists) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('유저 정보를 찾을 수 없습니다.')),
-      );
+      _showSimpleDialog(context, '오류', '유저 정보를 찾을 수 없습니다.');
       return;
     }
 
@@ -44,14 +54,7 @@ Future<void> CheckAdminAndNavigate({
       }
     } else {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('관리자만 사용 가능한 기능입니다.'),
-            duration: Duration(
-              seconds: 2,
-            ),
-          ),
-        );
+        _showSimpleDialog(context, '권한 없음', '관리자만 사용 가능한 메뉴입니다.');
         return;
       }
     }
