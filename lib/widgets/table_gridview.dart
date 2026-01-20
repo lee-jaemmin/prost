@@ -4,16 +4,16 @@ import 'package:prost/class/table_repo.dart';
 import 'package:prost/widgets/table_card.dart';
 
 class TableGridView extends StatelessWidget {
-  final String company;
+  final String companyid;
   final String section;
   final TableRepository _repo = TableRepository();
 
-  TableGridView({required this.company, required this.section});
+  TableGridView({required this.companyid, required this.section});
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<TableModel>>(
-      stream: _repo.getTablesStream(company, section), // 실시간 데이터 수신
+      stream: _repo.getTablesStream(companyid, section), // 실시간 데이터 수신
       builder: (context, snapshot) {
         if (snapshot.hasError)
           return Center(child: Text("오류 발생: snapshot.hasError"));

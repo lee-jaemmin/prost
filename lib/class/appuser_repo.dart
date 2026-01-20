@@ -24,8 +24,9 @@ class UserRepository {
 
   /// 이미 있는 데이터: 냅둠, 새 데이터: db에 등록
   Future<void> upsertFromAuth({
-    required String company,
+    required String companyid,
     required String username,
+    required String companyname,
     required bool isAdmin,
   }) async {
     final currentUser = _auth.currentUser;
@@ -35,7 +36,8 @@ class UserRepository {
     // create AppUser instance using company, username from outside
     final appUser = AppUser.fromFirebase(
       currentUser,
-      company: company,
+      companyid: companyid,
+      companyname: companyname,
       isAdmin: isAdmin,
       username: username,
     );
@@ -54,7 +56,8 @@ class UserRepository {
       // 바뀔 수 있을 만한 정보만 업데이트
       await ref.update({
         'username': username,
-        'company': company,
+        'companyid': companyid,
+        'companyname': companyname,
       });
     }
   }

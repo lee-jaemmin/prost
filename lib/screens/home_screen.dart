@@ -79,7 +79,7 @@ class HomeScreen extends StatelessWidget {
                       onTapFunc: () => CheckAdminAndNavigate(
                         context: context,
                         designatedPage: TableManagementScreen(
-                          company: _currentUser.company,
+                          company: _currentUser.companyid,
                         ),
                       ),
                     ),
@@ -102,7 +102,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             appBar: AppBar(
-              title: Text('${_currentUser.company} Dashboard'),
+              title: Text('${_currentUser.companyid} Dashboard'),
               bottom: TabBar(
                 isScrollable: true,
                 tabs: sections.map((s) => Tab(text: s)).toList(),
@@ -121,7 +121,7 @@ class HomeScreen extends StatelessWidget {
             body: TabBarView(
               children: sections.map((section) {
                 return TableGridView(
-                  company: _currentUser.company,
+                  companyid: _currentUser.companyid,
                   section: section,
                 );
               }).toList(),

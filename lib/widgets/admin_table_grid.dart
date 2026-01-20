@@ -4,12 +4,12 @@ import 'package:prost/widgets/admin_add_table_card.dart';
 import 'package:prost/widgets/admin_table_card.dart';
 
 class AdminTableGrid extends StatelessWidget {
-  final String company;
+  final String companyid;
   final String section;
 
   const AdminTableGrid({
     super.key,
-    required this.company,
+    required this.companyid,
     required this.section,
   });
 
@@ -34,7 +34,7 @@ class AdminTableGrid extends StatelessWidget {
               if (controller.text.trim().isNotEmpty) {
                 await FirebaseFirestore.instance
                     .collection('company')
-                    .doc(company)
+                    .doc(companyid)
                     .collection('tables')
                     .add({
                       'tableName': controller.text.trim(),
@@ -58,7 +58,7 @@ class AdminTableGrid extends StatelessWidget {
       // 해당 섹션에 속한 테이블만 필터링해서 가져옴
       stream: FirebaseFirestore.instance
           .collection('company')
-          .doc(company)
+          .doc(companyid)
           .collection('tables')
           .where('section', isEqualTo: section)
           .snapshots(),

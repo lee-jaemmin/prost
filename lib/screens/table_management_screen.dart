@@ -145,7 +145,7 @@ class _TableManagementScreenState extends State<TableManagementScreen> {
             body: TabBarView(
               children: [
                 ...sections.map(
-                  (s) => AdminTableGrid(company: widget.company, section: s),
+                  (s) => AdminTableGrid(companyid: widget.company, section: s),
                 ),
                 const Center(child: Text('새 섹션을 추가하여 매장을 구성하세요.')),
               ],
