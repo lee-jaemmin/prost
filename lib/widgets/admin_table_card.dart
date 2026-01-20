@@ -22,6 +22,7 @@ class AdminTableCard extends StatelessWidget {
           ),
         ),
         Positioned(
+          // 마이너스 기호
           top: 5,
           right: 5,
           child: GestureDetector(
