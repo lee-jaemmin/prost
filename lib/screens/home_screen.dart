@@ -63,6 +63,9 @@ class HomeScreen extends StatelessWidget {
             body: Center(child: CircularProgressIndicator()),
           );
         }
+        if (!snapshot.hasData) {
+          return const LoginScreen();
+        }
         final _currentUser = snapshot.data!;
 
         return DefaultTabController(
@@ -102,7 +105,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             appBar: AppBar(
-              title: Text('${_currentUser.companyid} Dashboard'),
+              title: Text('${_currentUser.companyname} Dashboard'),
               bottom: TabBar(
                 isScrollable: true,
                 tabs: sections.map((s) => Tab(text: s)).toList(),
