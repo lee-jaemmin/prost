@@ -79,7 +79,22 @@ class _LoginScreenState extends State<LoginScreen> {
               email: fakeEmail,
               password: password,
             );
+        final companyName = _companyController.text.trim();
+        final companyQuery = await FirebaseFirestore.instance
+            .collection('company')
+            .where('name', isEqualTo: companyName)
+            .get();
 
+        if (companyQuery.docs.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('존재하지 않는 회사입니다. 정확한 상업명을 입력해주세요.')),
+          );
+          return;
+        }
+
+        final companyDoc = companyQuery.docs.first;
+        final companyId = companyDoc.id;
+        final realCompanyName = companyDoc['name'];
         // Firestore 저장 (여기서는 실제 입력한 '아이디'를 저장해두면 보기 편함)
         await FirebaseFirestore.instance
             .collection('users')
@@ -88,7 +103,8 @@ class _LoginScreenState extends State<LoginScreen> {
               'username': _nameController.text.trim(), // 이름 저장
               'email': fakeEmail, // (참고용) 전체 이메일
               'id': _uidController.text.trim(),
-              'company': _companyController.text.trim(),
+              'companyid': companyId,
+              'companyname': realCompanyName,
               'role': 'user',
               'createdAt': FieldValue.serverTimestamp(),
             });
@@ -203,9 +219,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          _isPasswordValid
-                              ? "사용 가능한 비밀번호입니다."
-                              : "비밀번호가 6자리 미만입니다.",
+                          _isPasswordValid ? "" : "비밀번호가 6자리 미만입니다.",
                           style: TextStyle(
                             fontSize: 12,
                             color: _isPasswordValid ? Colors.green : Colors.red,
@@ -255,7 +269,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Text(
                       isLogin ? "아직 계정이 없으신가요?  회원가입" : "이미 계정이 있으신가요?  로그인",
                       style: const TextStyle(
-                        color: Colors.grey,
+                        color: Colors.black,
                         fontSize: 14,
                       ),
                     ),
