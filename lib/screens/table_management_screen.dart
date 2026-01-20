@@ -14,6 +14,7 @@ class TableManagementScreen extends StatefulWidget {
 class _TableManagementScreenState extends State<TableManagementScreen> {
   // 섹션 추가 팝업
   void _showAddSectionDialog() {
+    print(">>>>> 참조하려는 경로: company/${widget.company}");
     final controller = TextEditingController();
     showDialog(
       context: context,
@@ -30,12 +31,13 @@ class _TableManagementScreenState extends State<TableManagementScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text('취소'),
           ),
+
           TextButton(
             onPressed: () async {
               if (controller.text.trim().isNotEmpty) {
                 // company 문서의 sections 배열에 새 이름 추가
                 await FirebaseFirestore.instance
-                    .collection('companies')
+                    .collection('company')
                     .doc(widget.company)
                     .update({
                       'sections': FieldValue.arrayUnion([
@@ -67,7 +69,7 @@ class _TableManagementScreenState extends State<TableManagementScreen> {
           TextButton(
             onPressed: () async {
               await FirebaseFirestore.instance
-                  .collection('companies')
+                  .collection('company')
                   .doc(widget.company)
                   .update({
                     'sections': FieldValue.arrayRemove([sectionName]),
@@ -86,7 +88,7 @@ class _TableManagementScreenState extends State<TableManagementScreen> {
     // 업장(company) 문서의 실시간 스트림을 구독합니다.
     return StreamBuilder<DocumentSnapshot>(
       stream: FirebaseFirestore.instance
-          .collection('companies')
+          .collection('company')
           .doc(widget.company)
           .snapshots(),
       builder: (context, snapshot) {
