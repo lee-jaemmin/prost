@@ -33,7 +33,7 @@ class AdminTableGrid extends StatelessWidget {
             onPressed: () async {
               if (controller.text.trim().isNotEmpty) {
                 await FirebaseFirestore.instance
-                    .collection('companies')
+                    .collection('company')
                     .doc(company)
                     .collection('tables')
                     .add({
@@ -57,10 +57,10 @@ class AdminTableGrid extends StatelessWidget {
     return StreamBuilder<QuerySnapshot>(
       // 해당 섹션에 속한 테이블만 필터링해서 가져옴
       stream: FirebaseFirestore.instance
-          .collection('companies')
+          .collection('company')
           .doc(company)
           .collection('tables')
-          .where('section')
+          .where('section', isEqualTo: section)
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData)
