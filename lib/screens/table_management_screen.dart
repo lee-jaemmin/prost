@@ -1,7 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:prost/class/app_user.dart';
-import 'package:prost/widgets/admin_table_card.dart';
 import 'package:prost/widgets/admin_table_grid.dart'; //
 
 class TableManagementScreen extends StatefulWidget {
