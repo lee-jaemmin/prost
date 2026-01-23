@@ -25,12 +25,6 @@ class HomeScreen extends StatelessWidget {
     return AppUser.fromMap(doc.id, doc.data()!);
   }
 
-  final List<String> sections = [
-    'Bravo',
-    'Terrace',
-    'VIP',
-  ]; // 관리자 설정에서 가져오도록 확장 해야함.
-
   // scaffold key to open side bar safely
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -55,7 +49,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
+    return FutureBuilder<AppUser>(
       future: _fetchCurrentUser(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -63,73 +57,100 @@ class HomeScreen extends StatelessWidget {
             body: Center(child: CircularProgressIndicator()),
           );
         }
-        if (!snapshot.hasData) {
-          return const LoginScreen();
-        }
-        final _currentUser = snapshot.data!;
+        if (!snapshot.hasData) return const LoginScreen();
 
-        return DefaultTabController(
-          length: sections.length,
-          child: Scaffold(
-            key: _scaffoldKey,
-            endDrawer: Drawer(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 100.0),
-                child: Column(
-                  children: [
-                    SidebarMenu(
-                      name: '테이블 관리',
-                      onTapFunc: () => CheckAdminAndNavigate(
-                        context: context,
-                        designatedPage: TableManagementScreen(
-                          company: _currentUser.companyid,
+        final currentUser = snapshot.data!;
+
+        // StreamBuilder를 사용하여 DB를 실시간 구독
+        return StreamBuilder<DocumentSnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('company') // 관리자 화면과 컬렉션명을 맞춤
+              .doc(currentUser.companyid)
+              .snapshots(),
+          builder: (context, companySnapshot) {
+            if (companySnapshot.connectionState == ConnectionState.waiting) {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+
+            // DB에서 섹션 목록 가져오기
+            final companyData =
+                companySnapshot.data?.data() as Map<String, dynamic>?;
+            final List<String> sections = List<String>.from(
+              companyData?['sections'] ?? [],
+            );
+
+            return DefaultTabController(
+              key: ValueKey(sections.length), // 섹션 개수가 변할 때 TabBar를 강제 새로고침
+              length: sections.length,
+              child: Scaffold(
+                key: _scaffoldKey,
+                endDrawer: Drawer(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 100.0),
+                    child: Column(
+                      children: [
+                        SidebarMenu(
+                          name: '테이블 관리',
+                          onTapFunc: () => CheckAdminAndNavigate(
+                            context: context,
+                            designatedPage: TableManagementScreen(
+                              company: currentUser.companyid,
+                            ),
+                          ),
                         ),
-                      ),
+                        Gaps.v20(context),
+                        SidebarMenu(
+                          name: '예약',
+                          onTapFunc: () => CheckAdminAndNavigate(
+                            context: context,
+                            designatedPage: const TableReservationScreen(),
+                          ),
+                        ),
+                        Gaps.v20(context),
+                        SidebarMenu(
+                          name: '로그아웃',
+                          onTapFunc: () => signOutAndNavigate(context),
+                        ),
+                      ],
                     ),
-                    Gaps.v20(context),
-                    SidebarMenu(
-                      name: '예약',
-                      onTapFunc: () => CheckAdminAndNavigate(
-                        context: context,
-                        designatedPage: TableReservationScreen(),
-                      ),
-                    ),
-                    Gaps.v20(context),
-                    SidebarMenu(
-                      name: '로그아웃',
-                      onTapFunc: () => signOutAndNavigate(context),
-                    ),
-                    Gaps.v20(context),
-                  ],
-                ),
-              ),
-            ),
-            appBar: AppBar(
-              title: Text('${_currentUser.companyname} Dashboard'),
-              bottom: TabBar(
-                isScrollable: true,
-                tabs: sections.map((s) => Tab(text: s)).toList(),
-              ),
-              actions: [
-                Padding(
-                  padding: EdgeInsets.only(right: 20.0),
-                  child: GestureDetector(
-                    onTap: () => _scaffoldKey.currentState
-                        ?.openEndDrawer(), // open sidebar
-                    child: Icon(FontAwesomeIcons.bars),
                   ),
                 ),
-              ],
-            ),
-            body: TabBarView(
-              children: sections.map((section) {
-                return TableGridView(
-                  companyid: _currentUser.companyid,
-                  section: section,
-                );
-              }).toList(),
-            ),
-          ),
+                appBar: AppBar(
+                  title: Text('${currentUser.companyname} Dashboard'), //
+                  actions: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 20.0),
+                      child: GestureDetector(
+                        onTap: () => _scaffoldKey.currentState?.openEndDrawer(),
+                        child: const Icon(FontAwesomeIcons.bars),
+                      ),
+                    ),
+                  ],
+                  // DB에서 가져온 섹션들로 탭 생성
+                  bottom: sections.isEmpty
+                      ? null
+                      : TabBar(
+                          isScrollable: true,
+                          tabs: sections.map((s) => Tab(text: s)).toList(),
+                        ),
+                ),
+                body: sections.isEmpty
+                    ? const Center(
+                        child: Text('설정된 섹션이 없습니다. 관리자 모드에서 추가해주세요.'),
+                      )
+                    : TabBarView(
+                        children: sections.map((section) {
+                          return TableGridView(
+                            companyid: currentUser.companyid, //
+                            section: section,
+                          );
+                        }).toList(),
+                      ),
+              ),
+            );
+          },
         );
       },
     );
