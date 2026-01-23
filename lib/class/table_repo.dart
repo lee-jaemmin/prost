@@ -4,13 +4,11 @@ import 'package:firebase_auth/firebase_auth.dart' as auth;
 
 class TableRepository {
   final FirebaseFirestore _db;
-  final auth.FirebaseAuth _auth;
 
   TableRepository({
     FirebaseFirestore? db,
     auth.FirebaseAuth? authInstance,
-  }) : _db = db ?? FirebaseFirestore.instance,
-       _auth = authInstance ?? auth.FirebaseAuth.instance;
+  }) : _db = db ?? FirebaseFirestore.instance;
 
   /// return the address of 'collection' the group of doc.
   CollectionReference<Map<String, dynamic>> _tableCol(String company) {
@@ -20,15 +18,19 @@ class TableRepository {
   /// live stream
   Stream<List<TableModel>> getTablesStream(String company, String section) {
     return _tableCol(
-      company,
-    ).where('section', isEqualTo: section).snapshots().map((snap) {
-      final List<TableModel> tableList = snap.docs.map((doc) {
-        final Map<String, dynamic> data = doc.data();
-        final String id = doc.id;
-        return TableModel.fromMap(id, data);
-      }).toList();
-      return tableList;
-    });
+          company,
+        )
+        .where('section', isEqualTo: section)
+        .orderBy('tablename', descending: false)
+        .snapshots()
+        .map((snap) {
+          final List<TableModel> tableList = snap.docs.map((doc) {
+            final Map<String, dynamic> data = doc.data();
+            final String id = doc.id;
+            return TableModel.fromMap(id, data);
+          }).toList();
+          return tableList;
+        });
   }
 
   /* 
@@ -62,7 +64,7 @@ class TableRepository {
       bottle: bottle,
       staff: staff,
       persons: persons,
-      status: 'empty',
+      status: 'available',
       createdat: DateTime.now(),
     );
 
@@ -96,7 +98,7 @@ class TableRepository {
 
     for (var doc in snap.docs) {
       batch.update(doc.reference, {
-        'status': 'empty', //
+        'status': 'available', //
         'customer': '',
         'phonenumber': '',
         'staff': '',
@@ -123,9 +125,23 @@ class TableRepository {
       'phonenumber': phonenumber,
       'staff': staff,
       'bottle': bottle,
-      'status': 'active', // 정보가 입력되면 상태를 'active'로 변경
+      'status': 'inuse', // 정보가 입력되면 상태를 'inuse'로 변경
       'persons': persons,
       'updatedAt': FieldValue.serverTimestamp(), // 수정 시간 기록
+    });
+  }
+
+  /// [섹션] 섹션 목록 추가
+  Future<void> addSection(String companyId, String sectionName) async {
+    await _db.collection('company').doc(companyId).update({
+      'sections': FieldValue.arrayUnion([sectionName]),
+    });
+  }
+
+  /// [섹션] 섹션 목록 삭제
+  Future<void> removeSection(String companyId, String sectionName) async {
+    await _db.collection('company').doc(companyId).update({
+      'sections': FieldValue.arrayRemove([sectionName]),
     });
   }
 }
