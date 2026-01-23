@@ -60,84 +60,88 @@ class _TableRegistrationDialogState extends State<InfoAlert> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('${widget.table.tablename} 정보 등록'),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(labelText: '손님 이름'),
-            ),
-            TextField(
-              controller: _phoneController,
-              decoration: const InputDecoration(labelText: '손님 번호'),
-              keyboardType: TextInputType.phone,
-            ),
-            TextField(
-              controller: _bottleController,
-              decoration: const InputDecoration(labelText: '바틀(술 종류)'),
-            ),
-            TextField(
-              controller: _staffController,
-              decoration: const InputDecoration(labelText: '담당 스태프'),
-            ),
-            TextField(
-              controller: _remarksController,
-              decoration: const InputDecoration(labelText: '비고(특이사항)'),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('취소'),
-        ),
-        TextButton(
-          onPressed: () async {
-            await _repo.clearTable(widget.companyId, widget.table.tid);
-            if (context.mounted) Navigator.pop(context);
-          },
-          child: const Text('아웃', style: TextStyle(color: Colors.red)),
-        ),
-        TextButton(
-          onPressed: () {
-            Navigator.pop(context); // 현재 알림창 닫기
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => MoveScreen(
-                  companyId: widget.companyId,
-                  fromTable: widget.table,
-                ),
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: AlertDialog(
+        title: Text('${widget.table.tablename} 정보 등록'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _nameController,
+                decoration: const InputDecoration(labelText: '손님 이름'),
               ),
-            );
-          },
-          child: const Text('이동', style: TextStyle(color: Colors.blue)),
+              TextField(
+                controller: _phoneController,
+                decoration: const InputDecoration(labelText: '손님 번호'),
+                keyboardType: TextInputType.phone,
+              ),
+              TextField(
+                controller: _bottleController,
+                decoration: const InputDecoration(labelText: '바틀(술 종류)'),
+              ),
+              TextField(
+                controller: _staffController,
+                decoration: const InputDecoration(labelText: '담당 스태프'),
+              ),
+              TextField(
+                controller: _remarksController,
+                decoration: const InputDecoration(labelText: '비고(특이사항)'),
+              ),
+            ],
+          ),
         ),
-        TextButton(
-          onPressed: () async {
-            // 필수 정보 입력 확인 (이름, 바틀 등)
-            if (_nameController.text.isNotEmpty &&
-                _bottleController.text.isNotEmpty) {
-              await _repo.registerBottleKeep(
-                company: widget.companyId,
-                tid: widget.table.tid,
-                customer: _nameController.text.trim(),
-                phonenumber: _phoneController.text.trim(),
-                staff: _staffController.text.trim(),
-                persons: widget.table.persons, // 기존 인원 유지
-                bottle: _bottleController.text.trim(),
-                remark: _remarksController.text.trim(),
-              );
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () async {
+              await _repo.clearTable(widget.companyId, widget.table.tid);
               if (context.mounted) Navigator.pop(context);
-            }
-          },
-          child: const Text('등록'),
-        ),
-      ],
+            },
+            child: const Text('아웃', style: TextStyle(color: Colors.red)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // 현재 알림창 닫기
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MoveScreen(
+                    companyId: widget.companyId,
+                    fromTable: widget.table,
+                  ),
+                ),
+              );
+            },
+            child: const Text('이동', style: TextStyle(color: Colors.blue)),
+          ),
+          TextButton(
+            onPressed: () async {
+              // 필수 정보 입력 확인 (이름, 바틀 등)
+              if (_nameController.text.isNotEmpty &&
+                  _bottleController.text.isNotEmpty) {
+                await _repo.registerBottleKeep(
+                  company: widget.companyId,
+                  tid: widget.table.tid,
+                  customer: _nameController.text.trim(),
+                  phonenumber: _phoneController.text.trim(),
+                  staff: _staffController.text.trim(),
+                  persons: widget.table.persons, // 기존 인원 유지
+                  bottle: _bottleController.text.trim(),
+                  remark: _remarksController.text.trim(),
+                );
+                if (context.mounted) Navigator.pop(context);
+              }
+            },
+            child: const Text('등록'),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -40,6 +40,7 @@ class TableCard extends StatelessWidget {
           child: InkWell(
             onTap: () {
               showDialog(
+                barrierDismissible: false,
                 context: context,
                 builder: (context) =>
                     InfoAlert(companyId: companyId, table: table),
