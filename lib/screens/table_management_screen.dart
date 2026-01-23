@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:prost/class/table_repo.dart';
 import 'package:prost/widgets/admin_table_grid.dart'; //
 
 class TableManagementScreen extends StatefulWidget {
@@ -12,6 +13,8 @@ class TableManagementScreen extends StatefulWidget {
 }
 
 class _TableManagementScreenState extends State<TableManagementScreen> {
+  final TableRepository _repo = TableRepository();
+
   // 섹션 추가 팝업
   void _showAddSectionDialog() {
     print(">>>>> 참조하려는 경로: company/${widget.company}");
@@ -36,15 +39,21 @@ class _TableManagementScreenState extends State<TableManagementScreen> {
             onPressed: () async {
               if (controller.text.trim().isNotEmpty) {
                 // company 문서의 sections 배열에 새 이름 추가
-                await FirebaseFirestore.instance
-                    .collection('company')
-                    .doc(widget.company)
-                    .update({
-                      'sections': FieldValue.arrayUnion([
-                        controller.text.trim(),
-                      ]),
-                    });
-                if (mounted) Navigator.pop(context);
+                try {
+                  await _repo.addSection(
+                    widget.company,
+                    controller.text.trim(),
+                  );
+                  print('>>> 업데이트 성공');
+                  if (mounted) Navigator.pop(context);
+                } catch (e) {
+                  print('>>>> 테이블 업데이트 중 오류 발생 $e');
+                  if (mounted) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text('업데이트 실패 $e')));
+                  }
+                }
               }
             },
             child: const Text('추가'),
@@ -68,12 +77,7 @@ class _TableManagementScreenState extends State<TableManagementScreen> {
           ),
           TextButton(
             onPressed: () async {
-              await FirebaseFirestore.instance
-                  .collection('company')
-                  .doc(widget.company)
-                  .update({
-                    'sections': FieldValue.arrayRemove([sectionName]),
-                  });
+              await _repo.removeSection(widget.company, sectionName);
               if (mounted) Navigator.pop(context);
             },
             child: const Text('삭제', style: TextStyle(color: Colors.red)),
