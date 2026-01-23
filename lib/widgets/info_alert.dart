@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:prost/class/table.dart';
 import 'package:prost/class/table_repo.dart';
+import 'package:prost/screens/move_screen.dart';
 
 class InfoAlert extends StatefulWidget {
   final String companyId;
@@ -94,7 +95,29 @@ class _TableRegistrationDialogState extends State<InfoAlert> {
           onPressed: () => Navigator.pop(context),
           child: const Text('취소'),
         ),
-        ElevatedButton(
+        TextButton(
+          onPressed: () async {
+            await _repo.clearTable(widget.companyId, widget.table.tid);
+            if (context.mounted) Navigator.pop(context);
+          },
+          child: const Text('아웃', style: TextStyle(color: Colors.red)),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context); // 현재 알림창 닫기
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => MoveScreen(
+                  companyId: widget.companyId,
+                  fromTable: widget.table,
+                ),
+              ),
+            );
+          },
+          child: const Text('이동', style: TextStyle(color: Colors.blue)),
+        ),
+        TextButton(
           onPressed: () async {
             // 필수 정보 입력 확인 (이름, 바틀 등)
             if (_nameController.text.isNotEmpty &&
