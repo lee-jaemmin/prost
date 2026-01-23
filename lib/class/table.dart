@@ -9,6 +9,7 @@ class TableModel {
   final String phonenumber;
   final String staff;
   final String bottle;
+  final String remark;
   final int persons;
   final DateTime createdat;
 
@@ -22,6 +23,7 @@ class TableModel {
     required this.staff,
     required this.bottle,
     required this.persons,
+    required this.remark,
     required this.createdat,
   });
 
@@ -34,6 +36,7 @@ class TableModel {
     String? staff,
     String? bottle,
     int? persons,
+    String? remark,
     DateTime? createdat,
   }) {
     return TableModel(
@@ -46,6 +49,7 @@ class TableModel {
       staff: staff ?? this.staff,
       bottle: bottle ?? this.bottle,
       persons: persons ?? this.persons,
+      remark: remark ?? this.remark,
       createdat: createdat ?? this.createdat,
     );
   }
@@ -61,6 +65,7 @@ class TableModel {
       staff: map['staff'] ?? '스태프 미지정',
       bottle: map['bottle'] ?? '바틀 미지정',
       persons: map['persons'] ?? 0,
+      remark: map['remark'] ?? '비고 없음',
       createdat: (map['createdat'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
@@ -75,6 +80,7 @@ class TableModel {
       'staff': staff,
       'bottle': bottle,
       'persons': persons,
+      'remark': remark,
       'createdat': createdat,
     };
   }

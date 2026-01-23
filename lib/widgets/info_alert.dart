@@ -42,7 +42,9 @@ class _TableRegistrationDialogState extends State<InfoAlert> {
     _staffController = TextEditingController(
       text: widget.table.staff == '스태프 미지정' ? '' : widget.table.staff,
     );
-    _remarksController = TextEditingController(); // 비고는 현재 모델에 없으므로 일단 빈값
+    _remarksController = TextEditingController(
+      text: widget.table.staff == '비고 없음' ? '' : widget.table.remark,
+    );
   }
 
   @override
@@ -105,8 +107,8 @@ class _TableRegistrationDialogState extends State<InfoAlert> {
                 staff: _staffController.text.trim(),
                 persons: widget.table.persons, // 기존 인원 유지
                 bottle: _bottleController.text.trim(),
+                remark: _remarksController.text.trim(),
               );
-              // TODO: '비고' 필드를 모델에 추가했다면 여기에 함께 저장 로직 작성
               if (context.mounted) Navigator.pop(context);
             }
           },
