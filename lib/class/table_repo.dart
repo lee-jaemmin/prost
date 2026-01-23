@@ -125,6 +125,18 @@ class TableRepository {
     await batch.commit();
   }
 
+  /// [RES] 예약 시간 업데이트
+  Future<void> updateReservation(
+    String company,
+    String tid,
+    String? time,
+  ) async {
+    await _tableCol(company).doc(tid).update({
+      'reservationtime': time,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
   /// [DEL] Delete table
   Future<void> deleteTable(String company, String tid) async {
     await _tableCol(company).doc(tid).delete();

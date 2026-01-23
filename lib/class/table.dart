@@ -11,6 +11,7 @@ class TableModel {
   final String bottle;
   final String remark;
   final int persons;
+  final String? reservationTime;
   final DateTime createdat;
 
   const TableModel({
@@ -24,6 +25,7 @@ class TableModel {
     required this.bottle,
     required this.persons,
     required this.remark,
+    this.reservationTime,
     required this.createdat,
   });
 
@@ -37,6 +39,7 @@ class TableModel {
     String? bottle,
     int? persons,
     String? remark,
+    String? reservationTime,
     DateTime? createdat,
   }) {
     return TableModel(
@@ -50,6 +53,7 @@ class TableModel {
       bottle: bottle ?? this.bottle,
       persons: persons ?? this.persons,
       remark: remark ?? this.remark,
+      reservationTime: reservationTime ?? this.reservationTime,
       createdat: createdat ?? this.createdat,
     );
   }
@@ -66,6 +70,7 @@ class TableModel {
       bottle: map['bottle'] ?? '바틀 미지정',
       persons: map['persons'] ?? 0,
       remark: map['remark'] ?? '비고 없음',
+      reservationTime: map['reservationtime'] ?? '',
       createdat: (map['createdat'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
@@ -81,6 +86,7 @@ class TableModel {
       'bottle': bottle,
       'persons': persons,
       'remark': remark,
+      'reservationtime': reservationTime,
       'createdat': createdat,
     };
   }
