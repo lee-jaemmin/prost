@@ -132,6 +132,10 @@ class HomeScreen extends StatelessWidget {
                   bottom: sections.isEmpty
                       ? null
                       : TabBar(
+                          indicatorWeight: 4,
+                          labelStyle: TextStyle(fontSize: 16),
+                          labelPadding: EdgeInsets.symmetric(horizontal: 20.0),
+                          tabAlignment: TabAlignment.start,
                           isScrollable: true,
                           tabs: sections.map((s) => Tab(text: s)).toList(),
                         ),
