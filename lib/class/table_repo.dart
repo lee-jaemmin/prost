@@ -76,6 +76,55 @@ class TableRepository {
     );
   }
 
+  /// [OUT] Out table
+  Future<void> clearTable(String company, String tid) async {
+    await _tableCol(company).doc(tid).update({
+      'status': 'available', // 사용자 요청에 따라 available로 설정
+      'customer': '',
+      'phonenumber': '',
+      'staff': '',
+      'bottle': '',
+      'remark': '', // 비고란 추가
+      'persons': 0,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  /// [MOVE] 테이블 이동 처리 (A -> B)
+  Future<void> moveTable(
+    String company,
+    TableModel fromTable,
+    String toTid,
+  ) async {
+    final batch = _db.batch();
+
+    // 대상 테이블(toTid)로 모든 정보 복사 및 상태 변경
+    batch.update(_tableCol(company).doc(toTid), {
+      'status': 'active', // 이동 후 사용 중 상태로 변경
+      'customer': fromTable.customer,
+      'phonenumber': fromTable.phonenumber,
+      'staff': fromTable.staff,
+      'bottle': fromTable.bottle,
+      'remark': fromTable.remark,
+      'persons': fromTable.persons,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+
+    // 기존 테이블(fromTid) 정보 삭제 및 아웃 처리
+    batch.update(_tableCol(company).doc(fromTable.tid), {
+      'status': 'available',
+      'customer': '',
+      'phonenumber': '',
+      'staff': '',
+      'bottle': '',
+      'remark': '',
+      'persons': 0,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+
+    await batch.commit();
+  }
+
   /// [DEL] Delete table
   Future<void> deleteTable(String company, String tid) async {
     await _tableCol(company).doc(tid).delete();
