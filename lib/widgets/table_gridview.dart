@@ -16,7 +16,7 @@ class TableGridView extends StatelessWidget {
       stream: _repo.getTablesStream(companyid, section), // 실시간 데이터 수신
       builder: (context, snapshot) {
         if (snapshot.hasError)
-          return Center(child: Text("오류 발생: snapshot.hasError"));
+          return Center(child: Text("오류 발생: ${snapshot.error}"));
         if (!snapshot.hasData)
           return Center(child: CircularProgressIndicator());
 
