@@ -60,7 +60,7 @@ class TableModel {
       phonenumber: map['phonenumber'] ?? '번호 없음',
       staff: map['staff'] ?? '스태프 미지정',
       bottle: map['bottle'] ?? '바틀 미지정',
-      persons: map['persons'] ?? '인원 미지정',
+      persons: map['persons'] ?? 0,
       createdat: (map['createdat'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
