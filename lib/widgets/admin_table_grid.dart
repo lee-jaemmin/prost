@@ -37,7 +37,7 @@ class AdminTableGrid extends StatelessWidget {
                     .doc(companyid)
                     .collection('tables')
                     .add({
-                      'tableName': controller.text.trim(),
+                      'tablename': controller.text.trim(),
                       'section': section,
                       'status': 'available',
                       'createdAt': FieldValue.serverTimestamp(),
