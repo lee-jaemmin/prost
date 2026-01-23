@@ -9,7 +9,7 @@ class TableCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: table.status == 'empty' ? Colors.grey[500] : Colors.amber[100],
+      color: table.status == 'available' ? Colors.grey[200] : Colors.amber[100],
       child: InkWell(
         onTap: () {
           /* 클릭 시 바틀 상세 정보 팝업 */
@@ -25,9 +25,9 @@ class TableCard extends StatelessWidget {
               ),
               if (table.customer.isNotEmpty) ...[
                 SizedBox(height: 5),
-                Text(table.customer, style: TextStyle(fontSize: 14)), // 손님 이름
+                Text(table.bottle, style: TextStyle(fontSize: 14)), // 손님 이름
                 Text(
-                  table.bottle,
+                  table.staff,
                   style: TextStyle(fontSize: 12, color: Colors.blueGrey),
                 ), // 술 종류
               ],
