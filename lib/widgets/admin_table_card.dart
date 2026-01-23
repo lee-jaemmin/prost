@@ -17,7 +17,7 @@ class AdminTableCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
-            doc['tableName'], // 테이블 이름 (예: A1)
+            doc['tablename'], // 테이블 이름 (예: A1)
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
