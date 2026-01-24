@@ -175,6 +175,7 @@ class HomeScreen extends StatelessWidget {
             final List<String> sections = List<String>.from(
               companyData?['sections'] ?? [],
             );
+            sections.sort((a, b) => naturalSortCompare(a, b));
 
             return DefaultTabController(
               key: ValueKey(sections.length), // 섹션 개수가 변할 때 TabBar를 강제 새로고침
