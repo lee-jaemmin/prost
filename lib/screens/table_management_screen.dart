@@ -115,6 +115,10 @@ class _TableManagementScreenState extends State<TableManagementScreen> {
             appBar: AppBar(
               title: const Text('매장 구성 관리'),
               bottom: TabBar(
+                indicatorWeight: 4,
+                labelStyle: TextStyle(fontSize: 16),
+                labelPadding: EdgeInsets.symmetric(horizontal: 20.0),
+                tabAlignment: TabAlignment.start,
                 isScrollable: true,
                 tabs: [
                   ...sections.map(
