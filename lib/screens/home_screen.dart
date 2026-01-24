@@ -15,11 +15,13 @@ import 'package:prost/widgets/table_gridview.dart';
 /// -> Firestore에서 해당 UID 문서 조회
 /// -> AppUser.fromMap으로 변환 -> UI에서 사용
 class HomeScreen extends StatelessWidget {
-  Future<AppUser> _fetchCurrentUser() async {
+  Future<AppUser?> _fetchCurrentUser() async {
     final user = FirebaseAuth.instance.currentUser; // User 객체.
+    if (user == null) return null;
+
     final doc = await FirebaseFirestore.instance
         .collection('users')
-        .doc(user!.uid)
+        .doc(user.uid)
         .get();
 
     return AppUser.fromMap(doc.id, doc.data()!);
@@ -47,9 +49,100 @@ class HomeScreen extends StatelessWidget {
     }
   }
 
+  // 탈퇴 function
+  Future<void> withdrawMembership(BuildContext context) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('user가 존재하지 않습니다')),
+      );
+    }
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user!.uid)
+          .delete();
+
+      await user.delete();
+
+      if (context.mounted) {
+        _showWithdrawSuccessDialog(context);
+      }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'requires-recent-login') {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('보안을 위해 다시 로그인 후 탈퇴를 진행해주세요.')),
+          );
+          await FirebaseAuth.instance.signOut();
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+            (route) => false,
+          );
+        }
+      }
+    } catch (e) {
+      print("탈퇴 오류: $e");
+    }
+  }
+
+  void _showWithdrawSuccessDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // 확인 버튼을 눌러야만 나갈 수 있게 설정
+      builder: (context) => AlertDialog(
+        title: const Text('탈퇴 완료'),
+        content: const Text(
+          '회원 탈퇴가 완료되었습니다. 모든 개인정보와 식별 데이터가 즉시 삭제되었으며, 더 이상 복구할 수 없습니다.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              // 모든 페이지를 제거하고 로그인 화면으로 이동
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => const LoginScreen()),
+                (route) => false,
+              );
+            },
+            child: const Text('확인'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 탈퇴 문구
+  void _showWithdrawDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('회원 탈퇴'),
+        content: const Text(
+          '애플 앱스토어 규정 및 2026 보안 가이드라인에 따라, 탈퇴 즉시 귀하의 모든 개인정보와 식별 데이터는 서버에서 영구 삭제(익명화)됩니다. '
+          '탈퇴 보류 기간이 없으므로 삭제된 데이터는 복구할 수 없습니다. 정말 탈퇴하시겠습니까?',
+          style: TextStyle(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              withdrawMembership(context);
+            },
+            child: const Text('탈퇴하기', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<AppUser>(
+    return FutureBuilder<AppUser?>(
       future: _fetchCurrentUser(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -57,7 +150,9 @@ class HomeScreen extends StatelessWidget {
             body: Center(child: CircularProgressIndicator()),
           );
         }
-        if (!snapshot.hasData) return const LoginScreen();
+        if (!snapshot.hasData || snapshot.data == null) {
+          return const LoginScreen();
+        }
 
         final currentUser = snapshot.data!;
 
@@ -112,6 +207,11 @@ class HomeScreen extends StatelessWidget {
                         SidebarMenu(
                           name: '로그아웃',
                           onTapFunc: () => signOutAndNavigate(context),
+                        ),
+                        Gaps.v20(context),
+                        SidebarMenu(
+                          name: '회원 탈퇴',
+                          onTapFunc: () => _showWithdrawDialog(context),
                         ),
                       ],
                     ),
