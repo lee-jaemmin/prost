@@ -60,7 +60,7 @@ class TableCard extends StatelessWidget {
                       fontSize: 18,
                     ),
                   ),
-                  if (table.customer.isNotEmpty) ...[
+                  if (table.bottle.isNotEmpty) ...[
                     const SizedBox(height: 5),
                     Text(table.bottle, style: const TextStyle(fontSize: 14)),
                     Text(
