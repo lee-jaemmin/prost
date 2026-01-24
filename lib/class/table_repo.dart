@@ -15,6 +15,31 @@ class TableRepository {
     return _db.collection('company').doc(company).collection('tables');
   }
 
+  // 2차 오름차순 정렬. A10 문제 해결
+  int _naturalSort(String a, String b) {
+    // 정규표현식으로 문자와 숫자를 분리 (예: A1 -> ['A', '1'])
+    final regExp = RegExp(r'([A-Za-z]+)|(\d+)');
+    final matchesA = regExp.allMatches(a).toList();
+    final matchesB = regExp.allMatches(b).toList();
+
+    for (int i = 0; i < matchesA.length && i < matchesB.length; i++) {
+      final strA = matchesA[i].group(0)!;
+      final strB = matchesB[i].group(0)!;
+
+      // 둘 다 숫자인 경우 숫자로 비교
+      if (int.tryParse(strA) != null && int.tryParse(strB) != null) {
+        int numA = int.parse(strA);
+        int numB = int.parse(strB);
+        if (numA != numB) return numA.compareTo(numB);
+      } else {
+        // 문자인 경우 문자열로 비교
+        int res = strA.compareTo(strB);
+        if (res != 0) return res;
+      }
+    }
+    return a.length.compareTo(b.length);
+  }
+
   /// live stream
   Stream<List<TableModel>> getTablesStream(String company, String section) {
     return _tableCol(
@@ -29,6 +54,7 @@ class TableRepository {
             final String id = doc.id;
             return TableModel.fromMap(id, data);
           }).toList();
+          tableList.sort((a, b) => _naturalSort(a.tablename, b.tablename));
           return tableList;
         });
   }
