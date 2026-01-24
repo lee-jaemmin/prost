@@ -29,11 +29,14 @@ class _TableRegistrationDialogState extends State<InfoAlert> {
   late TextEditingController _remarksController;
   final _repo = TableRepository();
 
-  Future<AppUser> _fetchCurrentUser() async {
+  Future<AppUser?> _fetchCurrentUser() async {
     final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return null;
+    }
     final doc = await FirebaseFirestore.instance
         .collection('users')
-        .doc(user!.uid)
+        .doc(user.uid)
         .get();
 
     return AppUser.fromMap(doc.id, doc.data()!);
@@ -124,7 +127,10 @@ class _TableRegistrationDialogState extends State<InfoAlert> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('취소'),
+                child: const Text(
+                  '취소',
+                  style: TextStyle(color: Colors.black),
+                ),
               ),
               TextButton(
                 onPressed: () async {
