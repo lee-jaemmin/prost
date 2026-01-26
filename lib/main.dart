@@ -1,3 +1,4 @@
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:prost/firebase_options.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  await FirebaseAppCheck.instance.activate(
+    // 웹 환경이 아니라면 androidProvider에 Play Integrity를 설정합니다.
+    androidProvider: AndroidProvider.playIntegrity,
+  );
   runApp(const Prost());
 }
 
