@@ -176,7 +176,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    "자리 관리 프로그램",
+                    "GRID",
                     style: TextStyle(
                       fontSize: 38,
                       fontWeight: FontWeight.bold,
