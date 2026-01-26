@@ -1,10 +1,18 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:prost/class/table.dart';
+import 'package:prost/class/table_repo.dart';
 
 /// 관리자용 추가, 삭제 가능한 테이블 UI
 class AdminTableCard extends StatelessWidget {
-  final QueryDocumentSnapshot doc;
-  const AdminTableCard({super.key, required this.doc});
+  final TableModel table;
+  final String companyId;
+  final TableRepository _repo = TableRepository();
+
+  AdminTableCard({
+    super.key,
+    required this.table,
+    required this.companyId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +25,7 @@ class AdminTableCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
-            doc['tablename'], // 테이블 이름 (예: A1)
+            table.tablename, // 테이블 이름 (예: A1)
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
@@ -26,7 +34,8 @@ class AdminTableCard extends StatelessWidget {
           top: 5,
           right: 5,
           child: GestureDetector(
-            onTap: () => doc.reference.delete(), // 테이블 즉시 삭제
+            onTap: () async =>
+                await _repo.deleteTable(companyId, table.tid), // 테이블 즉시 삭제
             child: const Icon(Icons.remove_circle, color: Colors.red, size: 20),
           ),
         ),

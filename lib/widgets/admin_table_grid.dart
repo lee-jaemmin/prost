@@ -1,13 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:prost/class/table.dart';
+import 'package:prost/class/table_repo.dart';
 import 'package:prost/widgets/admin_add_table_card.dart';
 import 'package:prost/widgets/admin_table_card.dart';
 
 class AdminTableGrid extends StatelessWidget {
   final String companyid;
   final String section;
+  final TableRepository _repo = TableRepository();
 
-  const AdminTableGrid({
+  AdminTableGrid({
     super.key,
     required this.companyid,
     required this.section,
@@ -54,19 +57,14 @@ class AdminTableGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
+    return StreamBuilder<List<TableModel>>(
       // 해당 섹션에 속한 테이블만 필터링해서 가져옴
-      stream: FirebaseFirestore.instance
-          .collection('company')
-          .doc(companyid)
-          .collection('tables')
-          .where('section', isEqualTo: section)
-          .snapshots(),
+      stream: _repo.getTablesStream(companyid, section),
       builder: (context, snapshot) {
         if (!snapshot.hasData)
           return const Center(child: CircularProgressIndicator());
 
-        final tables = snapshot.data!.docs;
+        final tables = snapshot.data!;
 
         return GridView.builder(
           padding: const EdgeInsets.all(16),
@@ -83,7 +81,10 @@ class AdminTableGrid extends StatelessWidget {
               );
             }
             final tableDoc = tables[index];
-            return AdminTableCard(doc: tableDoc);
+            return AdminTableCard(
+              table: tableDoc,
+              companyId: companyid,
+            );
           },
         );
       },

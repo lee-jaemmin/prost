@@ -9,7 +9,9 @@ class TableModel {
   final String phonenumber;
   final String staff;
   final String bottle;
+  final String remark;
   final int persons;
+  final String? reservationTime;
   final DateTime createdat;
 
   const TableModel({
@@ -22,6 +24,8 @@ class TableModel {
     required this.staff,
     required this.bottle,
     required this.persons,
+    required this.remark,
+    this.reservationTime,
     required this.createdat,
   });
 
@@ -34,6 +38,8 @@ class TableModel {
     String? staff,
     String? bottle,
     int? persons,
+    String? remark,
+    String? reservationTime,
     DateTime? createdat,
   }) {
     return TableModel(
@@ -46,6 +52,8 @@ class TableModel {
       staff: staff ?? this.staff,
       bottle: bottle ?? this.bottle,
       persons: persons ?? this.persons,
+      remark: remark ?? this.remark,
+      reservationTime: reservationTime ?? this.reservationTime,
       createdat: createdat ?? this.createdat,
     );
   }
@@ -58,9 +66,11 @@ class TableModel {
       status: map['status'] ?? '상태 미지정',
       customer: map['customer'] ?? '손님 미지정',
       phonenumber: map['phonenumber'] ?? '번호 없음',
-      staff: map['staff'] ?? '스태프 미지정',
-      bottle: map['bottle'] ?? '바틀 미지정',
+      staff: map['staff'] ?? '',
+      bottle: map['bottle'] ?? '',
       persons: map['persons'] ?? 0,
+      remark: map['remark'] ?? '비고 없음',
+      reservationTime: map['reservationtime'] ?? '',
       createdat: (map['createdat'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
@@ -75,6 +85,8 @@ class TableModel {
       'staff': staff,
       'bottle': bottle,
       'persons': persons,
+      'remark': remark,
+      'reservationtime': reservationTime,
       'createdat': createdat,
     };
   }

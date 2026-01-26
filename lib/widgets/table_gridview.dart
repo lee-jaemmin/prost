@@ -32,7 +32,7 @@ class TableGridView extends StatelessWidget {
           itemCount: tables.length,
           itemBuilder: (context, index) {
             final table = tables[index];
-            return TableCard(table: table);
+            return TableCard(companyId: companyid, table: table);
           },
         );
       },

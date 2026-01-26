@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:prost/screens/password_reset_screen.dart';
 import 'package:prost/widgets/auth_textfield.dart';
 import 'package:prost/widgets/company_picker.dart';
 import 'home_screen.dart'; // 홈 화면 import 필요
@@ -18,24 +19,20 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final _nameController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _uidController = TextEditingController();
+  final _emailController = TextEditingController();
   final _companyController = TextEditingController();
   bool _isPasswordValid = false;
+  bool _isEmailValid = false;
   final _formKey = GlobalKey<FormState>();
-
-  String _generateFakeEmail(String id) {
-    // 사용자가 입력한 아이디에 우리만의 가짜 도메인을 붙입니다.
-    // 공백 제거 후 소문자로 통일하는 것이 안전합니다.
-    return "${id.trim()}@prost.com";
-  }
 
   String? _selectedCompany;
 
   @override
   void initState() {
     super.initState();
-    // [추가] 비밀번호 입력 시 실시간으로 유효성 체크
+    // 실시간 유효성 체크
     _passwordController.addListener(_validatePassword);
+    _emailController.addListener(_validateEmail);
   }
 
   @override
@@ -43,9 +40,25 @@ class _LoginScreenState extends State<LoginScreen> {
     _passwordController.removeListener(_validatePassword);
     _passwordController.dispose();
     _nameController.dispose();
-    _uidController.dispose();
+    _emailController.dispose();
     _companyController.dispose();
     super.dispose();
+  }
+
+  void _validateEmail() {
+    final text = _emailController.text.trim();
+    if (text.isEmpty) {
+      setState(() => _isEmailValid = true); // 비어있을 때는 경고를 띄우지 않음
+      return;
+    }
+
+    // 이메일 정규식
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    final isValid = emailRegex.hasMatch(text);
+
+    if (_isEmailValid != isValid) {
+      setState(() => _isEmailValid = isValid);
+    }
   }
 
   void _validatePassword() {
@@ -62,21 +75,21 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => isLoading = true);
 
     // 사용자가 입력한 아이디를 이메일 형식으로 변환
-    final String fakeEmail = _generateFakeEmail(_uidController.text);
+    final String userEmail = _emailController.text.trim();
     final String password = _passwordController.text.trim();
 
     try {
       if (isLogin) {
         // [로그인 로직] 변환된 이메일로 로그인 시도
         await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: fakeEmail,
+          email: userEmail,
           password: password,
         );
       } else {
         // [회원가입 로직]
         final userCredential = await FirebaseAuth.instance
             .createUserWithEmailAndPassword(
-              email: fakeEmail,
+              email: userEmail,
               password: password,
             );
         final companyName = _companyController.text.trim();
@@ -101,8 +114,8 @@ class _LoginScreenState extends State<LoginScreen> {
             .doc(userCredential.user!.uid)
             .set({
               'username': _nameController.text.trim(), // 이름 저장
-              'email': fakeEmail, // (참고용) 전체 이메일
-              'id': _uidController.text.trim(),
+              'email': userEmail, // (참고용) 전체 이메일
+              'id': _emailController.text.trim(),
               'companyid': companyId,
               'companyname': realCompanyName,
               'role': 'user',
@@ -115,12 +128,14 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } on FirebaseAuthException catch (e) {
-      String message = "오류가 발생했습니다.";
+      String message = "$e";
 
       // 사용자에게 보여줄 에러 메시지도 다듬어야 합니다.
       if (e.code == 'email-already-in-use') {
         message = "이미 사용 중인 아이디입니다.";
-      } else if (e.code == 'user-not-found' || e.code == 'wrong-password') {
+      } else if (e.code == 'user-not-found' ||
+          e.code == 'wrong-password' ||
+          e.code == 'invalid-credential') {
         message = "아이디 또는 비밀번호가 잘못되었습니다.";
       } else if (e.code == 'invalid-email') {
         message = "아이디 형식이 올바르지 않습니다.";
@@ -161,11 +176,20 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    "PROST",
+                    "자리 관리 프로그램",
                     style: TextStyle(
-                      fontSize: 40,
+                      fontSize: 38,
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    "구글 메일로 가입 시 비밀번호 찾기가 어려울 수 있습니다.",
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black54,
                     ),
                   ),
                   const SizedBox(height: 50),
@@ -196,12 +220,26 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   // [공통] 아이디
                   AuthTextfield(
-                    controller: _uidController,
-                    hintText: "아이디",
+                    controller: _emailController,
+                    hintText: "이메일",
                     icon: Icons.email_outlined,
                     keyboardType: TextInputType.emailAddress,
                   ),
                   const SizedBox(height: 16),
+                  if (!_isEmailValid && _emailController.text.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, left: 15),
+                      child: const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "올바른 이메일 형식이 아닙니다.",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ),
+                    ),
 
                   // [공통] 비밀번호
                   AuthTextfield(
@@ -209,7 +247,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     hintText: "비밀번호",
                     icon: Icons.lock_outline,
                     obscureText: true,
-                    suffixIcon: _isPasswordValid
+                    suffixIcon: (_isPasswordValid && !isLogin)
                         ? const Icon(Icons.check_circle, color: Colors.green)
                         : null,
                   ),
@@ -257,7 +295,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-
                   // 4. 모드 전환 버튼 (하단 회색 글씨)
                   GestureDetector(
                     onTap: () {
@@ -268,6 +305,26 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                     child: Text(
                       isLogin ? "아직 계정이 없으신가요?  회원가입" : "이미 계정이 있으신가요?  로그인",
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  GestureDetector(
+                    onTap: () {
+                      if (isLogin) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PasswordResetScreen(),
+                          ),
+                        );
+                      }
+                    },
+                    child: Text(
+                      isLogin ? "비밀번호를 잊어버리셨나요?  비밀번호 찾기" : "",
                       style: const TextStyle(
                         color: Colors.black,
                         fontSize: 14,
