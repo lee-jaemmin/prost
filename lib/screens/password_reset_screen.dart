@@ -18,6 +18,13 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
     final email = _emailController.text.trim();
     if (email.isEmpty) return;
 
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('이메일 형식이 아닙니다.')),
+      );
+      return;
+    }
     setState(() => _isLoading = true);
     try {
       // Firebase 비밀번호 재설정 링크 전송
@@ -25,7 +32,6 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
           .collection('users')
           .where('id', isEqualTo: email)
           .get();
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
 
       if (userQuery.docs.isEmpty) {
         if (mounted) {
@@ -67,6 +73,7 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
         );
       }
     } catch (e) {
+      print('>>>>>> 오류 발생: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('오류가 발생했습니다: $e')),
       );
