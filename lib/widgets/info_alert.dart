@@ -27,6 +27,7 @@ class _TableRegistrationDialogState extends State<InfoAlert> {
   late TextEditingController _bottleController;
   late TextEditingController _staffController;
   late TextEditingController _remarksController;
+  late TextEditingController _personsController;
   final _repo = TableRepository();
 
   Future<AppUser?> _fetchCurrentUser() async {
@@ -56,6 +57,9 @@ class _TableRegistrationDialogState extends State<InfoAlert> {
     _bottleController = TextEditingController(
       text: widget.table.bottle == '바틀 미지정' ? '' : widget.table.bottle,
     );
+    _personsController = TextEditingController(
+      text: widget.table.persons == 0 ? '' : widget.table.persons.toString(),
+    );
     _staffController = TextEditingController();
     _remarksController = TextEditingController(
       text: widget.table.staff == '비고 없음' ? '' : widget.table.remark,
@@ -68,6 +72,7 @@ class _TableRegistrationDialogState extends State<InfoAlert> {
     _phoneController.dispose();
     _bottleController.dispose();
     _staffController.dispose();
+    _personsController.dispose();
     _remarksController.dispose();
     super.dispose();
   }
@@ -112,6 +117,11 @@ class _TableRegistrationDialogState extends State<InfoAlert> {
                   TextField(
                     controller: _bottleController,
                     decoration: const InputDecoration(labelText: '바틀(술 종류)'),
+                  ),
+                  TextField(
+                    controller: _personsController,
+                    decoration: const InputDecoration(labelText: '인원'),
+                    keyboardType: TextInputType.phone,
                   ),
                   TextField(
                     controller: _staffController,
@@ -165,7 +175,9 @@ class _TableRegistrationDialogState extends State<InfoAlert> {
                       customer: _nameController.text.trim(),
                       phonenumber: _phoneController.text.trim(),
                       staff: _staffController.text.trim(),
-                      persons: widget.table.persons, // 기존 인원 유지
+                      persons:
+                          int.tryParse(_personsController.text.trim()) ??
+                          0, // 기존 인원 유지
                       bottle: _bottleController.text.trim(),
                       remark: _remarksController.text.trim(),
                     );
