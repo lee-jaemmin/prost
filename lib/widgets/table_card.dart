@@ -59,13 +59,23 @@ class TableCard extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
                     ),
+                    maxLines: 1,
                   ),
                   if (table.bottle.isNotEmpty) ...[
                     const SizedBox(height: 5),
-                    Text(table.bottle, style: const TextStyle(fontSize: 14)),
                     Text(
-                      table.staff,
-                      style: TextStyle(fontSize: 12, color: Colors.blueGrey),
+                      table.bottle,
+                      style: const TextStyle(fontSize: 14),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      '${table.persons}명',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.blueGrey,
+                      ),
+                      maxLines: 1,
                     ),
                   ],
                 ],
