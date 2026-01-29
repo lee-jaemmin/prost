@@ -1,3 +1,12 @@
+import java.util.Properties
+import java.io.FileInputStream
+
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+}
+
 plugins {
     id("com.android.application")
     // START: FlutterFire Configuration
@@ -33,12 +42,38 @@ android {
         versionName = flutter.versionName
     }
 
-    buildTypes {
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+    signingConfigs {
+        create("release") {
+            keyAlias = keystoreProperties.getProperty("keyAlias") ?: ""
+            keyPassword = keystoreProperties.getProperty("keyPassword")?: "" 
+            storePassword = keystoreProperties.getProperty("storePassword")?: ""
+
+            val fileName = keystoreProperties.getProperty("storeFile")
+            if(fileName != null) {
+                val keystoreFile = file(fileName)
+                if (keystoreFile.exists()) {
+                    storeFile = keystoreFile
+                } else {
+                    // 파일이 없을 경우 빌드 로그에 경고를 띄웁니다.
+                    println("------------------------------------------------------------")
+                    println("[경고] 키스토어 파일을 찾을 수 없습니다: ${keystoreFile.absolutePath}")
+                    println("------------------------------------------------------------")
+                }
+            }
         }
+    }
+
+    buildTypes {
+        getByName("release") {
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+                )
+        }
+       
     }
 }
 

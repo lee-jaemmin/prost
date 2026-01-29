@@ -43,3 +43,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+# Android Release Signing (보안 중요)
+android/key.properties
+android/app/*.jks
+android/app/*.keystore

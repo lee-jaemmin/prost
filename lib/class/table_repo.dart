@@ -69,7 +69,7 @@ class TableRepository {
 
   /// [ADD] create table
   Future<void> createTable({
-    required String company, // *** 이건 자동이어야 할 거 같은데 ***
+    required String company,
     required String tablename,
     required String section,
     required String customer,
@@ -126,7 +126,7 @@ class TableRepository {
 
     // 대상 테이블(toTid)로 모든 정보 복사 및 상태 변경
     batch.update(_tableCol(company).doc(toTid), {
-      'status': 'active', // 이동 후 사용 중 상태로 변경
+      'status': 'inuse', // 이동 후 사용 중 상태로 변경
       'customer': fromTable.customer,
       'phonenumber': fromTable.phonenumber,
       'staff': fromTable.staff,
