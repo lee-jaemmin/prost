@@ -313,7 +313,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           (isLoading ||
                               (!_isPasswordValid ||
                                   !_agreedToTerms ||
-                                  !_agreedToPrivacy))
+                                  !_agreedToPrivacy ||
+                                  _isEmailValid))
                           ? null
                           : _submit,
                       style: ElevatedButton.styleFrom(
