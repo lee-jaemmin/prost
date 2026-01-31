@@ -27,9 +27,7 @@ class _JoinScreenState extends State<JoinScreen> {
 
   // [로직] 테이블 터치 핸들러 (합석 생성 + 해제 통합)
   void _onTableTap(TableModel table) {
-    // -----------------------------------------------------------
-    // [A] 기존 합석 해제 로직 (이미 합석된 테이블을 터치했을 때)
-    // -----------------------------------------------------------
+    // 합석 해제
     if (table.groupid != null) {
       if (table.ismaster) {
         // 마스터 테이블 터치 -> 그룹 전체 해제 팝업
@@ -73,13 +71,10 @@ class _JoinScreenState extends State<JoinScreen> {
       return; // 기존 합석 처리 로직이 실행되었으므로 여기서 종료
     }
 
-    // -----------------------------------------------------------
-    // [B] 신규 합석 선택 로직 (기존 코드 유지)
-    // -----------------------------------------------------------
+    /// 신규 합석
     setState(() {
-      // 1. 마스터 선택
+      // 마스터 선택
       if (_selectedMasterId == null) {
-        // 빈 테이블 선택 시 거부
         if (table.status == 'available') {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -93,15 +88,13 @@ class _JoinScreenState extends State<JoinScreen> {
 
         _selectedMasterId = table.tid;
         _selectedMasterName = table.tablename;
-      }
-      // 2. 마스터 선택 취소
-      else if (_selectedMasterId == table.tid) {
+      } else if (_selectedMasterId == table.tid) {
         _selectedMasterId = null;
         _selectedMasterName = null;
         _selectedSlaveIds.clear();
         _selectedSlaveTables.clear();
       }
-      // 3. 슬레이브 선택
+      // 슬레이브 선택
       else {
         // 이미 선택된 슬레이브: 해제
         if (_selectedSlaveIds.contains(table.tid)) {
@@ -127,7 +120,7 @@ class _JoinScreenState extends State<JoinScreen> {
     });
   }
 
-  // [실행] 합석 확정 로직 (기존과 동일)
+  // 합석 확정
   Future<void> _executeJoin() async {
     if (_selectedMasterId == null || _selectedSlaveIds.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -201,6 +194,31 @@ class _JoinScreenState extends State<JoinScreen> {
     }
   }
 
+  int naturalSortCompare(String a, String b) {
+    // 숫자와 숫자가 아닌 부분을 분리하는 정규식
+    final regExp = RegExp(r'([0-9]+)|([^0-9]+)');
+    final matchesA = regExp.allMatches(a).toList();
+    final matchesB = regExp.allMatches(b).toList();
+
+    for (int i = 0; i < matchesA.length && i < matchesB.length; i++) {
+      final groupA = matchesA[i].group(0)!;
+      final groupB = matchesB[i].group(0)!;
+
+      // 두 부분이 모두 숫자인 경우 숫자로 비교
+      if (RegExp(r'^[0-9]+$').hasMatch(groupA) &&
+          RegExp(r'^[0-9]+$').hasMatch(groupB)) {
+        int numA = int.parse(groupA);
+        int numB = int.parse(groupB);
+        if (numA != numB) return numA.compareTo(numB);
+      } else {
+        // 숫자가 아닌 경우 문자열로 비교
+        int res = groupA.compareTo(groupB);
+        if (res != 0) return res;
+      }
+    }
+    return a.length.compareTo(b.length);
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<DocumentSnapshot>(
@@ -219,6 +237,7 @@ class _JoinScreenState extends State<JoinScreen> {
         final List<String> sections = List<String>.from(
           companyData?['sections'] ?? [],
         );
+        sections.sort((a, b) => naturalSortCompare(a, b));
 
         return DefaultTabController(
           length: sections.length,
@@ -239,6 +258,10 @@ class _JoinScreenState extends State<JoinScreen> {
                 ),
               ],
               bottom: TabBar(
+                indicatorWeight: 4,
+                labelStyle: TextStyle(fontSize: 16),
+                labelPadding: EdgeInsets.symmetric(horizontal: 20.0),
+                tabAlignment: TabAlignment.start,
                 isScrollable: true,
                 tabs: sections.map((s) => Tab(text: s)).toList(),
               ),
@@ -260,7 +283,6 @@ class _JoinScreenState extends State<JoinScreen> {
                     ],
                   ),
                 ),
-                // [메인 그리드 뷰] - 여기서 분리한 위젯을 사용합니다!
                 Expanded(
                   child: TabBarView(
                     children: sections.map((section) {
