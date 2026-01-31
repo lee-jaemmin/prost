@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
 class TableModel {
   final String tid;
@@ -13,6 +14,9 @@ class TableModel {
   final int persons;
   final String? reservationTime;
   final DateTime createdat;
+  final String? groupid;
+  final bool ismaster;
+  final String? mastertablenumber;
 
   const TableModel({
     required this.tid,
@@ -26,6 +30,9 @@ class TableModel {
     required this.persons,
     required this.remark,
     this.reservationTime,
+    this.groupid,
+    this.ismaster = false,
+    this.mastertablenumber,
     required this.createdat,
   });
 
@@ -40,6 +47,9 @@ class TableModel {
     int? persons,
     String? remark,
     String? reservationTime,
+    String? groupid,
+    bool? ismaster,
+    String? mastertablenumber,
     DateTime? createdat,
   }) {
     return TableModel(
@@ -54,6 +64,9 @@ class TableModel {
       persons: persons ?? this.persons,
       remark: remark ?? this.remark,
       reservationTime: reservationTime ?? this.reservationTime,
+      groupid: groupid ?? this.groupid,
+      ismaster: ismaster ?? this.ismaster,
+      mastertablenumber: mastertablenumber ?? this.mastertablenumber,
       createdat: createdat ?? this.createdat,
     );
   }
@@ -71,6 +84,9 @@ class TableModel {
       persons: map['persons'] ?? 0,
       remark: map['remark'] ?? '비고 없음',
       reservationTime: map['reservationtime'] ?? '',
+      groupid: map['groupid'],
+      ismaster: map['ismaster'] ?? false,
+      mastertablenumber: map['mastertablenumber'],
       createdat: (map['createdat'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
@@ -87,6 +103,9 @@ class TableModel {
       'persons': persons,
       'remark': remark,
       'reservationtime': reservationTime,
+      'groupid': groupid,
+      'ismaster': ismaster,
+      'mastertablenumber': mastertablenumber,
       'createdat': createdat,
     };
   }

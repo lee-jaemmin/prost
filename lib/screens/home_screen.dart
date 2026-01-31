@@ -5,6 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:prost/class/app_user.dart';
 import 'package:prost/constants/gaps.dart';
 import 'package:prost/methods/check_admin.dart';
+import 'package:prost/screens/join_screen.dart';
 import 'package:prost/screens/login_screen.dart';
 import 'package:prost/screens/table_management_screen.dart';
 import 'package:prost/screens/table_reservation_screen.dart';
@@ -188,7 +189,7 @@ class HomeScreen extends StatelessWidget {
                     child: Column(
                       children: [
                         SidebarMenu(
-                          name: '테이블 관리',
+                          name: '테이블 배치 관리',
                           onTapFunc: () => CheckAdminAndNavigate(
                             context: context,
                             designatedPage: TableManagementScreen(
@@ -203,6 +204,21 @@ class HomeScreen extends StatelessWidget {
                             context: context,
                             designatedPage: const TableReservationScreen(),
                           ),
+                        ),
+                        Gaps.v20(context),
+                        SidebarMenu(
+                          name: '합석 관리',
+                          onTapFunc: () {
+                            Navigator.pop(context); // 드로어 닫기
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => JoinScreen(
+                                  companyId: currentUser.companyid,
+                                ),
+                              ),
+                            );
+                          },
                         ),
                         Gaps.v20(context),
                         SidebarMenu(
