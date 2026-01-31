@@ -66,6 +66,30 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  bool _isFormValid() {
+    if (isLoading) return false;
+
+    // 공통 조건: 이메일이 유효하고, 비어있지 않으며, 비밀번호가 유효해야 함
+    final bool emailFilled = _emailController.text.trim().isNotEmpty;
+    final bool passwordFilled = _passwordController.text.isNotEmpty;
+
+    if (isLogin) {
+      // 로그인 모드: 이메일과 비밀번호만 체크
+      return emailFilled && passwordFilled;
+    } else {
+      // 회원가입 모드: 이메일 유효성 + 비밀번호 유효성 + 약관 동의 2종 + 이름/업장 입력 여부
+      // _isEmailValid는 정규식을 통과했을 때만 true가 되도록 기존 로직을 따름
+      return _isEmailValid &&
+          emailFilled &&
+          _isPasswordValid &&
+          passwordFilled &&
+          _agreedToTerms &&
+          _agreedToPrivacy &&
+          _nameController.text.trim().isNotEmpty && // 이름 입력 필수
+          _companyController.text.trim().isNotEmpty; // 업장 선택 필수
+    }
+  }
+
   Future<void> _launchURL(String urlString) async {
     final Uri url = Uri.parse(urlString);
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
@@ -309,14 +333,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed:
-                          (isLoading ||
-                              (!_isPasswordValid ||
-                                  !_agreedToTerms ||
-                                  !_agreedToPrivacy ||
-                                  _isEmailValid))
-                          ? null
-                          : _submit,
+                      onPressed: _isFormValid() ? _submit : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black87, // 브랜드 컬러
                         disabledBackgroundColor: Colors.grey.shade300,
