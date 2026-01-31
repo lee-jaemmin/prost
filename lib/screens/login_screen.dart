@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:prost/screens/password_reset_screen.dart';
+import 'package:prost/widgets/agree_checkbox.dart';
 import 'package:prost/widgets/auth_textfield.dart';
 import 'package:prost/widgets/company_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/gestures.dart';
 import 'home_screen.dart'; // 홈 화면 import 필요
 
 class LoginScreen extends StatefulWidget {
@@ -23,6 +26,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final _companyController = TextEditingController();
   bool _isPasswordValid = false;
   bool _isEmailValid = false;
+  bool _agreedToTerms = false;
+  bool _agreedToPrivacy = false;
   final _formKey = GlobalKey<FormState>();
 
   String? _selectedCompany;
@@ -61,6 +66,13 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _launchURL(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw Exception('Could not launch $url');
+    }
+  }
+
   void _validatePassword() {
     final isValid = _passwordController.text.length >= 6;
     if (_isPasswordValid != isValid) {
@@ -71,6 +83,8 @@ class _LoginScreenState extends State<LoginScreen> {
   // 제출 함수 (로그인 또는 회원가입)
   void _submit() async {
     if (!_formKey.currentState!.validate()) return;
+
+    if (!isLogin && (!_agreedToTerms || !_agreedToPrivacy)) return;
 
     setState(() => isLoading = true);
 
@@ -267,12 +281,39 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   const SizedBox(height: 40),
 
+                  if (!isLogin) ...[
+                    const SizedBox(height: 24),
+                    AgreeCheckbox(
+                      title: "이용약관",
+                      value: _agreedToTerms,
+                      onChanged: (v) =>
+                          setState(() => _agreedToTerms = v ?? false),
+                      onTapTitle: () => _launchURL(
+                        "https://sites.google.com/view/grid-conditionterms?usp=sharing",
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    AgreeCheckbox(
+                      title: "개인정보처리방침",
+                      value: _agreedToPrivacy,
+                      onChanged: (v) =>
+                          setState(() => _agreedToPrivacy = v ?? false),
+                      onTapTitle: () => _launchURL(
+                        "https://sites.google.com/view/gridprivatepolicy?usp=sharing",
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 40),
                   // 3. 메인 버튼 (로그인 or 가입하기)
                   SizedBox(
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: (isLoading || (!isLogin && !_isPasswordValid))
+                      onPressed:
+                          (isLoading ||
+                              (!_isPasswordValid ||
+                                  !_agreedToTerms ||
+                                  !_agreedToPrivacy))
                           ? null
                           : _submit,
                       style: ElevatedButton.styleFrom(
