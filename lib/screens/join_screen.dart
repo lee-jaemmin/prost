@@ -29,46 +29,34 @@ class _JoinScreenState extends State<JoinScreen> {
   void _onTableTap(TableModel table) {
     // 합석 해제
     if (table.groupid != null) {
-      if (table.ismaster) {
-        // 마스터 테이블 터치 -> 그룹 전체 해제 팝업
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('합석 해제'),
-            content: Text(
-              '${table.tablename} 테이블과 연결된\n모든 합석을 해제하시겠습니까?',
-              textAlign: TextAlign.center,
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('취소', style: TextStyle(color: Colors.grey)),
-              ),
-              TextButton(
-                onPressed: () async {
-                  await _repo.unjoinGroup(
-                    company: widget.companyId,
-                    groupid: table.groupid!,
-                  );
-                  if (mounted) Navigator.pop(context); // 다이얼로그 닫기
-                },
-                child: const Text('해제 확정', style: TextStyle(color: Colors.red)),
-              ),
-            ],
+      // 마스터 테이블 터치 -> 그룹 전체 해제 팝업
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('합석 해제'),
+          content: Text(
+            '${table.tablename} 테이블과 연결된\n모든 합석을 해제하시겠습니까?',
+            textAlign: TextAlign.center,
           ),
-        );
-      } else {
-        // 슬레이브 테이블 터치 -> 안내 메시지
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '합석 해제는 메인 테이블([${table.mastertablenumber}])을 선택해주세요.',
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('취소', style: TextStyle(color: Colors.grey)),
             ),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
-      return; // 기존 합석 처리 로직이 실행되었으므로 여기서 종료
+            TextButton(
+              onPressed: () async {
+                await _repo.unjoinGroup(
+                  company: widget.companyId,
+                  groupid: table.groupid!,
+                );
+                if (mounted) Navigator.pop(context); // 다이얼로그 닫기
+              },
+              child: const Text('해제 확정', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        ),
+      );
+      return;
     }
 
     /// 신규 합석
