@@ -104,16 +104,64 @@ class TableRepository {
 
   /// [OUT] Out table
   Future<void> clearTable(String company, String tid) async {
-    await _tableCol(company).doc(tid).update({
-      'status': 'available', // 사용자 요청에 따라 available로 설정
-      'customer': '',
-      'phonenumber': '',
-      'staff': '',
-      'bottle': '',
-      'remark': '', // 비고란 추가
-      'persons': 0,
-      'updatedat': FieldValue.serverTimestamp(),
-    });
+    // 1. 해당 테이블의 현재 데이터를 먼저 가져와 groupid 확인
+    final doc = await _tableCol(company).doc(tid).get();
+    final data = doc.data();
+    if (data == null) return;
+
+    final String? groupid = data['groupid'];
+    final batch = _db.batch(); // 일괄 처리를 위한 배치 생성
+
+    if (groupid != null) {
+      // 합석 중인 경우 해당 groupid를 공유하는 모든 테이블을 찾음
+      final snapshot = await _tableCol(
+        company,
+      ).where('groupid', isEqualTo: groupid).get();
+
+      for (var tableDoc in snapshot.docs) {
+        if (tableDoc.id == tid) {
+          // [Case A] 지금 아웃(Out)시키는 테이블: 모든 정보 초기화
+          batch.update(tableDoc.reference, {
+            'status': 'available',
+            'customer': '',
+            'phonenumber': '',
+            'staff': '',
+            'bottle': '',
+            'remark': '',
+            'persons': 0,
+            'groupid': FieldValue.delete(),
+            'ismaster': FieldValue.delete(),
+            'mastertablenumber': FieldValue.delete(),
+            'updatedat': FieldValue.serverTimestamp(),
+          });
+        } else {
+          // [Case B] 같은 그룹이었던 다른 테이블들: 합석 관계만 끊고 기록/상태는 유지
+          batch.update(tableDoc.reference, {
+            'groupid': FieldValue.delete(),
+            'ismaster': FieldValue.delete(),
+            'mastertablenumber': FieldValue.delete(),
+            'updatedat': FieldValue.serverTimestamp(),
+          });
+        }
+      }
+    } else {
+      // 3. 합석 중이 아닌 경우: 해당 테이블만 정상적으로 초기화
+      batch.update(_tableCol(company).doc(tid), {
+        'status': 'available',
+        'customer': '',
+        'phonenumber': '',
+        'staff': '',
+        'bottle': '',
+        'remark': '',
+        'persons': 0,
+        'groupid': FieldValue.delete(),
+        'ismaster': FieldValue.delete(),
+        'mastertablenumber': FieldValue.delete(),
+        'updatedat': FieldValue.serverTimestamp(),
+      });
+    }
+
+    await batch.commit(); // 모든 변경 사항을 한 번에 적용
   }
 
   /// [MOVE] 테이블 이동 처리 (A -> B)
@@ -187,7 +235,7 @@ class TableRepository {
 
     for (var doc in snap.docs) {
       batch.update(doc.reference, {
-        'status': 'available', //
+        'status': 'available',
         'customer': '',
         'phonenumber': '',
         'staff': '',
@@ -265,16 +313,9 @@ class TableRepository {
       } else {
         // 슬레이브 테이블: 정보 삭제, 'available' 상태로 초기화
         batch.update(doc.reference, {
-          'status': 'available',
           'groupid': FieldValue.delete(),
           'ismaster': FieldValue.delete(),
           'mastertablenumber': FieldValue.delete(),
-          'customer': '',
-          'phonenumber': '',
-          'staff': '',
-          'bottle': '',
-          'remark': '',
-          'persons': 0,
           'updatedat': FieldValue.serverTimestamp(),
         });
       }
